@@ -69,8 +69,9 @@ aplikasi multi-pengguna nyata, gunakan mode database dengan PostgreSQL/Supabase.
 
 ## Akun demo
 
-Kata sandi demo lokal saat ini: **`DemoIDB2026!`** — dipakai oleh semua akun di bawah.
-Nilai ini mengikuti `SEED_PASSWORD` di `.env.local` (bukan di kode frontend). Email demo:
+Kata sandi demo saat ini: **`DemoIDB2026!`** — dipakai oleh semua akun demo di bawah.
+Pada mode database, nilai ini mengikuti `SEED_PASSWORD` di `.env.local`. Pada halaman `/demo`, kata
+sandi bersama tersebut disimpan sebagai konstanta demo karena autentikasi berjalan di browser. Email demo:
 
 | Peran | Email |
 |---|---|
@@ -81,8 +82,9 @@ Nilai ini mengikuti `SEED_PASSWORD` di `.env.local` (bukan di kode frontend). Em
 Untuk mengganti kata sandi semua akun demo setelah mengubah `SEED_PASSWORD`, jalankan
 `npm run db:demo-password` saat server lokal berhenti.
 
-Dengan `DEMO_MODE=true`, tombol **Masuk cepat** pada halaman login membuka sesi tanpa mengetik sandi.
-Mahasiswa juga dapat membuat akun sendiri lewat `/register` (akun baru otomatis berperan `mahasiswa`).
+Dengan `DEMO_MODE=true`, `/demo` menampilkan halaman login dengan email + kata sandi demo, serta daftar
+**Masuk cepat** untuk lima akun demo. Registrasi mandiri lewat `/register` hanya tersedia saat mode
+database aktif (`DEMO_MODE=false`); akun baru otomatis berperan `mahasiswa`.
 
 > **Data ruang adalah contoh pengujian**, bukan data resmi kampus. Ganti melalui panel admin sebelum
 > dipakai untuk operasional.

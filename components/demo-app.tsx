@@ -22,6 +22,7 @@ import {
 import { nextFreeSlots, overlaps } from "@/lib/slots";
 import {
   DEMO_ACCOUNTS,
+  DEMO_PASSWORD,
   DEMO_RESERVATION_KEY,
   DEMO_ROOMS,
   DEMO_SETTINGS,
@@ -113,6 +114,38 @@ function DemoBoot() {
 }
 
 function DemoLogin({ onSelect }: { onSelect: (account: SessionUser) => void }) {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [busy, setBusy] = useState(false);
+
+  function submit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setError("");
+    const nextErrors: Record<string, string> = {};
+    if (!email.trim()) nextErrors.email = "Masukkan email akun demo.";
+    if (!password) nextErrors.password = "Masukkan kata sandi demo.";
+    setFieldErrors(nextErrors);
+    if (Object.keys(nextErrors).length > 0) return;
+
+    const account = DEMO_ACCOUNTS.find(
+      (item) => item.email.toLowerCase() === email.trim().toLowerCase(),
+    );
+    if (!account) {
+      setError("Email tidak terdaftar sebagai akun demo. Gunakan akun pada daftar masuk cepat.");
+      return;
+    }
+    if (password !== DEMO_PASSWORD) {
+      setError(`Kata sandi demo salah. Gunakan ${DEMO_PASSWORD} untuk login manual.`);
+      return;
+    }
+
+    setBusy(true);
+    onSelect(account);
+  }
+
   return (
     <div className="auth demo-auth">
       <aside className="auth-aside">
@@ -127,20 +160,27 @@ function DemoLogin({ onSelect }: { onSelect: (account: SessionUser) => void }) {
         <div>
           <p className="eyebrow">Demo interaktif · Vercel ready</p>
           <h1>
-            Reservasi ruang <em>tanpa database.</em>
+            Ruang yang tepat, <em>untuk karya terbaik.</em>
           </h1>
           <p className="lead">
-            Semua reservasi disimpan di browser ini. Coba ajukan peminjaman sebagai mahasiswa, lalu masuk sebagai
-            admin untuk menyetujui atau menolak pengajuan yang sama.
+            Masuk dengan akun demo untuk mencoba alur reservasi lengkap. Semua data tersimpan di browser ini, jadi
+            mahasiswa dan admin dapat melihat pengajuan yang sama.
           </p>
         </div>
 
         <div className="auth-points">
           <div className="auth-point">
-            <Icon name="database" />
+            <Icon name="search" />
             <div>
-              <strong>Tersimpan di localStorage</strong>
-              <span>Data tetap ada saat halaman dimuat ulang atau akun diganti.</span>
+              <strong>Cari ruang yang sesuai</strong>
+              <span>Filter berdasarkan tanggal, waktu, kapasitas, dan fasilitas.</span>
+            </div>
+          </div>
+          <div className="auth-point">
+            <Icon name="shield" />
+            <div>
+              <strong>Validasi bentrok jadwal</strong>
+              <span>Sistem memeriksa konflik sebelum pengajuan dikirim.</span>
             </div>
           </div>
           <div className="auth-point">
@@ -170,42 +210,113 @@ function DemoLogin({ onSelect }: { onSelect: (account: SessionUser) => void }) {
       <main className="auth-main">
         <div className="auth-card demo-auth-card">
           <div>
-            <p className="eyebrow">Mode demo</p>
-            <h2>Pilih akun untuk masuk</h2>
-            <p className="lead">
-              Tidak perlu kata sandi. Akun dan data ruangan berasal dari data contoh di kode.
+            <p className="eyebrow">Masuk · mode demo</p>
+            <h2>Selamat datang kembali</h2>
+            <p className="muted" style={{ fontSize: 14 }}>
+              Gunakan email akun demo dan kata sandi bersama, atau pilih akun pada daftar masuk cepat.
             </p>
           </div>
 
-          <div className="demo-account-grid">
+          {error ? (
+            <div className="auth-error is-on" role="alert">
+              {error}
+            </div>
+          ) : null}
+
+          <form onSubmit={submit} noValidate style={{ display: "grid", gap: "var(--space-s)" }}>
+            <div className="field" data-invalid={fieldErrors.email ? "true" : undefined}>
+              <label htmlFor="demo-login-email">
+                Email akun demo <span className="req" aria-hidden="true">*</span>
+              </label>
+              <input
+                className="input"
+                id="demo-login-email"
+                name="email"
+                type="email"
+                inputMode="email"
+                autoComplete="username"
+                placeholder="nia@student.idbbali.ac.id"
+                value={email}
+                onChange={(event) => {
+                  setEmail(event.target.value);
+                  setFieldErrors((current) => ({ ...current, email: "" }));
+                  setError("");
+                }}
+                required
+              />
+              <p className="field-error">{fieldErrors.email}</p>
+            </div>
+
+            <div className="field" data-invalid={fieldErrors.password ? "true" : undefined}>
+              <label htmlFor="demo-login-password">
+                Kata sandi demo <span className="req" aria-hidden="true">*</span>
+              </label>
+              <div className="pass-wrap">
+                <input
+                  className="input"
+                  id="demo-login-password"
+                  name="password"
+                  type={showPassword ? "text" : "password"}
+                  autoComplete="current-password"
+                  placeholder="Masukkan kata sandi demo"
+                  value={password}
+                  onChange={(event) => {
+                    setPassword(event.target.value);
+                    setFieldErrors((current) => ({ ...current, password: "" }));
+                    setError("");
+                  }}
+                  required
+                />
+                <button
+                  type="button"
+                  className="pass-toggle"
+                  aria-pressed={showPassword}
+                  onClick={() => setShowPassword((value) => !value)}
+                >
+                  {showPassword ? "Sembunyikan" : "Lihat"}
+                </button>
+              </div>
+              <p className="field-error">{fieldErrors.password}</p>
+            </div>
+
+            <button className="btn btn-primary btn-block" type="submit" disabled={busy}>
+              {busy ? "Membuka sesi demo…" : "Masuk ke demo"}
+            </button>
+          </form>
+
+          <div className="auth-demo">
+            <div className="auth-demo-head">
+              <span>Masuk cepat — akun demo</span>
+              <span className="mono" style={{ fontSize: 10.5 }}>tanpa kata sandi</span>
+            </div>
             {DEMO_ACCOUNTS.map((account) => (
               <button
                 key={account.id}
                 type="button"
-                className="demo-account-card"
+                className="demo-btn"
                 onClick={() => onSelect(account)}
               >
-                <span className="avatar avatar-lg">{account.initials}</span>
-                <span className="demo-account-copy">
+                <span className="avatar">{account.initials}</span>
+                <span className="grow">
                   <strong>{account.fullName}</strong>
-                  <small>{account.email}</small>
-                  <span className="demo-account-meta">
-                    <span className="badge">{roleLabel(account.role)}</span>
-                    <span>{account.identity ?? account.program}</span>
-                  </span>
+                  <small>{account.email} · {account.identity ?? account.program}</small>
                 </span>
-                <Icon name="arrowRight" className="demo-account-arrow" />
+                <span className="pill pill-role">{roleLabel(account.role)}</span>
               </button>
             ))}
+            <div className="auth-demo-password">
+              <span>Kata sandi demo untuk login manual</span>
+              <code>{DEMO_PASSWORD}</code>
+            </div>
           </div>
 
           <div className="notice notice-info">
-            <Icon name="info" />
+            <Icon name="database" />
             <div>
               <strong>Data demo tersimpan di browser ini</strong>
               <span>
-                Gunakan tombol “Reset data demo” di dalam aplikasi untuk menghapus seluruh perubahan dan kembali ke
-                reservasi contoh.
+                Reservasi tetap ada setelah reload dan saat berganti akun. Gunakan “Reset data demo” di dalam
+                aplikasi untuk kembali ke data contoh.
               </span>
             </div>
           </div>

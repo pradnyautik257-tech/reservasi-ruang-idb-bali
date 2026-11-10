@@ -16,6 +16,9 @@ import type {
 export const DEMO_RESERVATION_KEY = "idb-demo-reservations-v1";
 export const DEMO_USER_KEY = "idb-demo-user-v1";
 
+/** Kata sandi bersama untuk login manual akun demo. Hanya untuk mode demo. */
+export const DEMO_PASSWORD = "DemoIDB2026!";
+
 export const DEMO_SETTINGS: Settings = {
   openHour: "07:00",
   closeHour: "22:00",

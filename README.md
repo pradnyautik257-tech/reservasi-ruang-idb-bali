@@ -8,6 +8,10 @@ Tailwind CSS + PostgreSQL**.
 > (PGlite) agar bisa dijalankan tanpa Docker atau akun cloud. Skema, constraint, dan alur transaksi
 > kompatibel dengan PostgreSQL/Supabase. Jalur migrasi Supabase ada di [`supabase/`](supabase/README.md).
 
+> **Mode demo Vercel.** Halaman `/demo` adalah versi demo mandiri yang berjalan sepenuhnya di browser.
+> Reservasi disimpan di `localStorage`, sehingga tidak membutuhkan PGlite/database saat dibuka di
+> Vercel. Saat `DEMO_MODE=true` atau `VERCEL=1`, route aplikasi diarahkan otomatis ke `/demo`.
+
 ---
 
 ## Menjalankan
@@ -31,8 +35,23 @@ DEMO_MODE=true
 
 - `SEED_PASSWORD` dipakai sekali saat database pertama kali di-seed. Kata sandi disimpan sebagai hash
   **scrypt**; tidak ada kata sandi di kode frontend.
-- `DEMO_MODE=true` menampilkan tombol **masuk cepat** di halaman login. **Matikan di produksi.**
+- `DEMO_MODE=true` mengaktifkan mode demo: route aplikasi diarahkan ke `/demo` dan reservasi disimpan
+  di `localStorage`. **Matikan di produksi yang memakai database asli.**
 - Salin `.env.local.example` bila ingin menyiapkan environment baru.
+
+### Demo di Vercel
+
+1. Import repositori ini ke Vercel sebagai proyek **Next.js**.
+2. Build command: `npm run build` (default). Tidak perlu database atau environment tambahan.
+3. Di Vercel, `VERCEL=1` otomatis mengaktifkan mode demo. Root domain akan diarahkan ke `/demo`.
+4. Jika ingin mengaktifkan mode demo di luar Vercel, set `DEMO_MODE=true`.
+5. Data demo tersimpan **per browser**, bukan di server. Data akan terlihat oleh semua akun demo
+   ketika berpindah akun di browser yang sama, dan bertahan setelah halaman dimuat ulang.
+6. Gunakan **Reset data demo** di sidebar atau halaman **Pengaturan Demo** untuk mengembalikan data
+   contoh dari kode.
+
+Catatan: `localStorage` tidak dibagi antar perangkat/browser dan bukan penyimpanan produksi. Untuk
+aplikasi multi-pengguna nyata, gunakan mode database dengan PostgreSQL/Supabase.
 
 ### Skrip
 
@@ -192,6 +211,7 @@ Rumus bentrok: `start < other_end AND end > other_start` pada ruang & tanggal ya
 
 ```text
 app/
+├─ demo/                  # demo client-side, data reservasi di localStorage
 ├─ (app)/                 # area terautentikasi (header + footer)
 │  ├─ page.tsx            # beranda
 │  ├─ ruang/              # pencarian & daftar ruang
